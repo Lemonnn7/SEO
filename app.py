@@ -1,16 +1,17 @@
 from flask import Flask, render_template, request
 from datetime import datetime, timedelta
-
+import pytz
 
 app = Flask(__name__)
 
 
 def calculate_preparation_time(eat_time_str, work_minutes):
     eat_time = datetime.strptime(eat_time_str, '%H:%M')
-    current_time = datetime.now()
-    today_eat_time = datetime(current_time.year, current_time.month, current_time.day, eat_time.hour, eat_time.minute)
+    beijing_tz = pytz.timezone('Asia/Shanghai')
+    current_time = datetime.now(beijing_tz)
+    today_eat_time = beijing_tz.localize(datetime(current_time.year, current_time.month, current_time.day, eat_time.hour, eat_time.minute))
     if today_eat_time < current_time:
-        eat_time = datetime(current_time.year, current_time.month, current_time.day + 1, eat_time.hour, eat_time.minute)
+        eat_time = today_eat_time + timedelta(days=1)
     else:
         eat_time = today_eat_time
     preparation_time = eat_time - current_time - timedelta(minutes=work_minutes)
